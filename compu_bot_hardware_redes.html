@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compu Bot — Hardware y Redes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0e172a;
+      --surface:#14233f;
+      --card:#1a3158;
+      --teal:#2dd4bf;
+      --blue:#60a5fa;
+      --purple:#a78bfa;
+      --gold:#fbbf24;
+      --green:#4ade80;
+      --orange:#fb923c;
+      --red:#f87171;
+      --white:#eef6ff;
+      --muted:#b9c8e6;
+      --shadow:0 18px 44px rgba(0,0,0,.35);
+    }
+
+    body{
+      font-family:'Nunito',sans-serif;
+      background:linear-gradient(180deg,#0a1324 0%, #10203a 55%, #13294a 100%);
+      color:var(--white);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:'';
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(96,165,250,.16), transparent 24%),
+        radial-gradient(circle at 86% 14%, rgba(45,212,191,.10), transparent 22%),
+        radial-gradient(circle at 50% 75%, rgba(167,139,250,.10), transparent 28%);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .screen{display:none;position:relative;z-index:1}
+    .screen.active{display:flex}
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:12px 24px;
+      font-weight:900;
+      font-size:15px;
+      cursor:pointer;
+      transition:.25s ease;
+      font-family:'Nunito',sans-serif;
+    }
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;box-shadow:0 10px 24px rgba(96,165,250,.24)}
+    .btn-secondary{background:rgba(255,255,255,.08);color:var(--white);border:1px solid rgba(255,255,255,.08)}
+    .btn-danger{background:rgba(248,113,113,.14);color:#fecaca;border:1px solid rgba(248,113,113,.24)}
+
+    /* INTRO */
+    #intro{
+      min-height:100vh;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      text-align:center;
+      padding:30px 20px;
+      gap:18px;
+    }
+    .hero-icon{font-size:96px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 12px 28px rgba(0,0,0,.34))}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .logo{font-family:'Fredoka One',cursive;font-size:60px;line-height:1;background:linear-gradient(135deg,var(--teal),var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .tagline{max-width:840px;font-size:18px;color:var(--muted);line-height:1.75}
+    .mini-note{font-size:13px;color:var(--muted)}
+    .top-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+    .world-cards{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:18px;width:min(1100px,100%);margin-top:12px}
+    .world-card{
+      background:rgba(20,35,63,.94);
+      border:2px solid transparent;
+      border-radius:26px;
+      padding:24px 22px;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      text-align:left;
+      box-shadow:var(--shadow);
+      transition:.28s ease;
+      min-height:210px;
+    }
+    .world-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--c1),var(--c2));opacity:.12}
+    .world-card:hover{transform:translateY(-6px);border-color:var(--c1)}
+    .world-card>*{position:relative;z-index:1}
+    .world-icon{font-size:48px;margin-bottom:10px}
+    .world-title{font-family:'Fredoka One',cursive;font-size:25px;margin-bottom:6px}
+    .world-desc{font-size:14px;color:var(--muted);line-height:1.65}
+    .world-badge{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12px;font-weight:900;letter-spacing:.3px}
+    .w1{--c1:#60a5fa;--c2:#2dd4bf}
+    .w2{--c1:#fbbf24;--c2:#fb923c}
+    .w3{--c1:#a78bfa;--c2:#60a5fa}
+    .w4{--c1:#4ade80;--c2:#2dd4bf}
+
+    /* LESSON */
+    #lesson{min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:28px 18px;gap:18px;text-align:center}
+    .lesson-icon{font-size:72px;animation:float 2.7s ease-in-out infinite}
+    .lesson-title{font-family:'Fredoka One',cursive;font-size:38px}
+    .lesson-box{width:min(940px,100%);background:rgba(20,35,63,.95);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:30px;box-shadow:var(--shadow);text-align:left}
+    .lesson-box p{line-height:1.8;color:#d7e2f5}
+    .lesson-highlight{margin:18px 0;background:rgba(255,255,255,.05);border-left:4px solid var(--gold);border-radius:14px;padding:16px 18px}
+    .concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:18px}
+    .concept-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:15px}
+    .concept-card h4{margin-bottom:6px;color:var(--gold)}
+    .concept-card p{font-size:14px;color:var(--muted);line-height:1.65}
+
+    /* GAME */
+    #game{min-height:100vh;flex-direction:column;padding:18px;width:min(1220px,100%);margin:0 auto}
+    .game-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+    .level-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--gold);margin-bottom:8px}
+    .progress-wrap{width:240px;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+    .progress-bar{height:100%;width:10%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:999px;transition:width .35s ease}
+    .hud{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .badge{background:rgba(20,35,63,.95);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:9px 16px;font-weight:900;box-shadow:var(--shadow)}
+
+    .timer-box{min-width:190px;background:rgba(20,35,63,.95);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px 12px;box-shadow:var(--shadow)}
+    .timer-header{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:14px;margin-bottom:8px}
+    .timer-track{height:10px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+    .timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));transition:width .95s linear}
+    .timer-text{color:var(--gold)}
+
+    .game-layout{display:grid;grid-template-columns:1.08fr .92fr;gap:18px;align-items:start}
+    .panel{background:rgba(20,35,63,.95);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .mission-title{font-family:'Fredoka One',cursive;color:var(--teal);font-size:18px;margin-bottom:10px}
+    .mission-sub{color:var(--muted);font-size:14px;line-height:1.7}
+    .fragment-box{margin-top:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:18px;min-height:180px;display:flex;align-items:center;font-size:19px;line-height:1.85;color:#f8fbff;white-space:pre-wrap}
+    .hint-box{margin-top:14px;background:rgba(96,165,250,.10);border-left:4px solid var(--blue);border-radius:14px;padding:12px 14px;color:#bfdbfe;font-size:14px;line-height:1.7}
+    .question-chip{display:inline-flex;align-items:center;gap:8px;font-weight:900;color:var(--gold);margin-bottom:12px;font-size:16px}
+    .options{display:grid;gap:12px;margin-top:10px}
+    .option{background:rgba(255,255,255,.05);border:2px solid transparent;border-radius:18px;padding:16px;cursor:pointer;transition:.2s ease;text-align:left}
+    .option:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.15)}
+    .option.selected{border-color:var(--gold);background:rgba(251,191,36,.12)}
+    .option.correct{border-color:var(--green);background:rgba(74,222,128,.15)}
+    .option.wrong{border-color:var(--red);background:rgba(248,113,113,.14)}
+    .option-title{font-weight:900;font-size:16px;margin-bottom:4px}
+    .option-desc{font-size:14px;color:var(--muted);line-height:1.6}
+    .action-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .side-card{margin-top:14px;background:rgba(255,255,255,.05);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.06)}
+    .side-card h4{color:var(--purple);margin-bottom:8px}
+    .side-card p{color:var(--muted);line-height:1.7;font-size:14px}
+
+    /* FEEDBACK */
+    .feedback{position:fixed;inset:0;background:rgba(7,10,22,.56);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
+    .feedback.show{display:flex}
+    .feedback-card{width:min(520px,100%);background:#182042;border:2px solid rgba(255,255,255,.08);border-radius:26px;padding:30px;text-align:center;box-shadow:0 28px 70px rgba(0,0,0,.45)}
+    .fb-icon{font-size:64px;margin-bottom:10px}.fb-title{font-family:'Fredoka One',cursive;font-size:32px;margin-bottom:8px}.fb-msg{color:var(--muted);line-height:1.8;margin-bottom:18px}.fb-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .confetti-piece{position:fixed;width:10px;height:10px;border-radius:2px;animation:fall 1.8s ease-in forwards;pointer-events:none;z-index:120}
+    @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(680deg);opacity:0}}
+    .floaty{position:fixed;font-weight:900;color:rgba(255,255,255,.12);animation:floaty 16s linear infinite;pointer-events:none;z-index:0;user-select:none}
+    @keyframes floaty{from{transform:translateY(110vh) rotate(0deg);opacity:0}15%{opacity:1}85%{opacity:1}to{transform:translateY(-15vh) rotate(360deg);opacity:0}}
+
+    @media(max-width:980px){.world-cards,.game-layout{grid-template-columns:1fr}.logo{font-size:48px}.lesson-title{font-size:32px}}
+    @media(max-width:620px){.hero-icon{font-size:78px}.logo{font-size:40px}.fragment-box{font-size:17px}}
+  </style>
+</head>
+<body>
+  <section id="intro" class="screen active">
+    <div class="hero-icon">🖥️🌐🤖</div>
+    <div class="logo">Compu Bot</div>
+    <p class="tagline">Explora Hardware y Redes de Computadores con mundos interactivos sobre componentes, dispositivos de red, topologías, direccionamiento IP y diagnóstico técnico. Un prototipo educativo inspirado en la lógica de recursos interactivos como “Las Partes del Computador”, pero adaptado al estilo gamificado de los prototipos más avanzados que hemos venido construyendo. fileciteturn5file0turn5file3turn5file4</p>
+    <div class="top-controls">
+      <button class="btn btn-secondary" onclick="toggleSound()" id="soundBtn">🔊 Sonido ON</button>
+    </div>
+    <p class="mini-note">Elige un mundo y activa tu laboratorio tecnológico.</p>
+
+    <div class="world-cards">
+      <article class="world-card w1" onclick="startWorld(1)">
+        <div class="world-icon">🖥️</div>
+        <div class="world-title">Mundo 1 · Hardware Base</div>
+        <div class="world-desc">Reconoce partes internas y externas del computador, funciones y relaciones entre componentes.</div>
+        <div class="world-badge">HARDWARE</div>
+      </article>
+      <article class="world-card w2" onclick="startWorld(2)">
+        <div class="world-icon">🌐</div>
+        <div class="world-title">Mundo 2 · Dispositivos de Red</div>
+        <div class="world-desc">Diferencia router, switch, access point, cableado y otros elementos clave de la conectividad.</div>
+        <div class="world-badge">REDES</div>
+      </article>
+      <article class="world-card w3" onclick="startWorld(3)">
+        <div class="world-icon">🔗</div>
+        <div class="world-title">Mundo 3 · Topologías</div>
+        <div class="world-desc">Identifica topologías de red y comprende su estructura, ventajas y limitaciones.</div>
+        <div class="world-badge">TOPOLOGÍAS</div>
+      </article>
+      <article class="world-card w4" onclick="startWorld(4)">
+        <div class="world-icon">🧪</div>
+        <div class="world-title">Mundo 4 · Diagnóstico y Soporte</div>
+        <div class="world-desc">Interpreta situaciones técnicas y selecciona la mejor acción de diagnóstico o soporte inicial.</div>
+        <div class="world-badge">SOPORTE</div>
+      </article>
+    </div>
+
+    <p class="mini-note">⭐ 100 puntos por acierto · ❤️ 3 vidas · ⏱️ 25 segundos por nivel</p>
+  </section>
+
+  <section id="lesson" class="screen">
+    <div class="lesson-icon" id="lessonIcon">🖥️</div>
+    <div class="lesson-title" id="lessonTitle">Lección</div>
+    <div class="lesson-box">
+      <p id="lessonText"></p>
+      <div class="lesson-highlight" id="lessonHighlight"></div>
+      <div class="concept-grid" id="lessonConcepts"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-primary" onclick="startGame()">¡Comenzar reto! →</button>
+      <button class="btn btn-secondary" onclick="goHome()">Volver</button>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="game-header">
+      <div>
+        <div class="level-title" id="levelLabel">Mundo — Nivel 1</div>
+        <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+      <div class="hud">
+        <div class="badge">⭐ <span id="scoreDisplay">0</span> pts</div>
+        <div class="badge" id="livesDisplay">❤️❤️❤️</div>
+        <div class="timer-box">
+          <div class="timer-header"><span>⏱️ Tiempo</span><span class="timer-text" id="timerText">25 s</span></div>
+          <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+        </div>
+        <button class="btn btn-secondary" onclick="toggleSound()">🔊/🔇 Sonido</button>
+        <button class="btn btn-secondary" onclick="goHome()">🏠 Inicio</button>
+      </div>
+    </div>
+
+    <div class="game-layout">
+      <div class="panel">
+        <div class="mission-title">🧩 Situación o concepto</div>
+        <p class="mission-sub" id="missionText"></p>
+        <div class="fragment-box" id="fragmentBox"></div>
+        <div class="hint-box" id="hintBox"></div>
+      </div>
+
+      <div class="panel">
+        <div class="question-chip">🧠 <span id="questionText">Pregunta</span></div>
+        <div class="options" id="optionsBox"></div>
+        <div class="action-row">
+          <button class="btn btn-primary" onclick="checkAnswer()">Responder</button>
+          <button class="btn btn-danger" onclick="clearSelection()">Limpiar</button>
+        </div>
+        <div class="side-card">
+          <h4>🔎 Recuerda</h4>
+          <p id="rememberText">Relaciona función, contexto y dispositivo antes de responder.</p>
+        </div>
+        <div class="side-card">
+          <h4>🎯 Meta del nivel</h4>
+          <p id="goalText">Comprender el concepto técnico y escoger la respuesta más precisa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="feedback" id="feedback">
+    <div class="feedback-card">
+      <div class="fb-icon" id="fbIcon">🎉</div>
+      <div class="fb-title" id="fbTitle">¡Correcto!</div>
+      <div class="fb-msg" id="fbMsg"></div>
+      <div class="fb-actions">
+        <button class="btn btn-primary" id="nextBtn" onclick="nextLevel()">Siguiente nivel</button>
+        <button class="btn btn-secondary" onclick="retryLevel()">Reintentar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_LIVES = 3;
+    const LEVEL_TIME = 25;
+
+    const WORLDS = {
+      1:{
+        name:'Hardware Base',
+        lesson:{
+          icon:'🖥️',
+          title:'Componentes de hardware y su función',
+          text:'El hardware corresponde a los componentes físicos del computador. Conocer sus partes permite entender cómo entra, procesa, almacena y sale la información.',
+          highlight:'Clave: un componente no se reconoce solo por su nombre, sino por la función que cumple dentro del sistema.',
+          concepts:[
+            {title:'CPU',desc:'Procesa instrucciones y coordina tareas del sistema.'},
+            {title:'RAM',desc:'Memoria temporal usada mientras se ejecutan procesos.'},
+            {title:'Almacenamiento',desc:'Guarda la información de forma permanente.'},
+            {title:'Periféricos',desc:'Permiten entrada o salida de información.'}
+          ]
+        },
+        levels:[
+          {mission:'Reconoce el componente descrito.', fragment:'Es el encargado de ejecutar instrucciones, realizar operaciones lógicas y coordinar el funcionamiento general del computador.', hint:'Piensa en el “cerebro” del equipo.', question:'¿Qué componente corresponde a esa descripción?', options:[{title:'Monitor',desc:'Muestra información en pantalla.'},{title:'CPU',desc:'Procesa y coordina las operaciones.'},{title:'Teclado',desc:'Sirve para entrada de datos.'},{title:'Impresora',desc:'Produce salida en papel.'}], correct:1, explanation:'La CPU es el componente que ejecuta instrucciones y coordina el funcionamiento del sistema.', remember:'Relaciona siempre función con componente.', goal:'Distinguir componentes por su función principal.'},
+          {mission:'Diferencia memoria y almacenamiento.', fragment:'Un estudiante apaga el computador y los archivos de su documento siguen guardados, pero los procesos que estaban abiertos desaparecen.', hint:'No todo lo que usa el equipo se conserva al apagarlo.', question:'¿Qué componente guarda la información de forma permanente?', options:[{title:'RAM',desc:'Es temporal y se borra al apagar.'},{title:'SSD o disco',desc:'Conserva la información.'},{title:'GPU',desc:'Procesa gráficos.'},{title:'Fuente de poder',desc:'Entrega energía.'}], correct:1, explanation:'El almacenamiento permanente, como SSD o disco, conserva los archivos después de apagar el equipo.', remember:'La RAM trabaja mientras el equipo está encendido.', goal:'Diferenciar memoria temporal y almacenamiento permanente.'},
+          {mission:'Clasifica un periférico.', fragment:'Permite introducir texto, números y comandos al sistema usando teclas organizadas en bloques funcionales.', hint:'Es un periférico de entrada muy común.', question:'¿A qué dispositivo se refiere?', options:[{title:'Mouse',desc:'Sirve para apuntar y hacer clic.'},{title:'Teclado',desc:'Permite ingresar texto y comandos.'},{title:'Monitor',desc:'Muestra información visual.'},{title:'Parlante',desc:'Reproduce sonido.'}], correct:1, explanation:'Se refiere al teclado, un periférico de entrada para introducir texto y comandos.', remember:'Entrada y salida ayudan a clasificar periféricos.', goal:'Identificar periféricos de entrada.'},
+          {mission:'Relaciona un síntoma con un componente.', fragment:'El equipo enciende, pero no muestra imagen. El monitor funciona correctamente y el problema parece estar en el procesamiento gráfico.', hint:'Piensa en el componente encargado de gestionar video e imágenes.', question:'¿Qué componente conviene revisar?', options:[{title:'Tarjeta gráfica o GPU',desc:'Gestiona el procesamiento visual.'},{title:'Teclado',desc:'No controla la imagen.'},{title:'Audífonos',desc:'No participan en video.'},{title:'Micrófono',desc:'Es un periférico de entrada de audio.'}], correct:0, explanation:'La tarjeta gráfica o GPU es la encargada del procesamiento visual y la salida de imagen.', remember:'La pista clave está en “procesamiento gráfico”.', goal:'Relacionar fallas con componentes internos.'},
+          {mission:'Cierra el mundo con una integración conceptual.', fragment:'Para que un computador funcione, necesita procesamiento, memoria de trabajo, almacenamiento, energía y medios de entrada/salida.', hint:'No se trata de una sola pieza, sino de un conjunto organizado.', question:'¿Qué idea resume mejor este planteamiento?', options:[{title:'El computador depende de la integración de varios componentes físicos',desc:'Es la idea central.'},{title:'Solo la CPU es importante en un computador',desc:'Reduce en exceso el sistema.'},{title:'Los periféricos sustituyen los componentes internos',desc:'No es correcto.'},{title:'La memoria RAM guarda los archivos por años',desc:'Eso es falso.'}], correct:0, explanation:'El funcionamiento del computador depende de la integración coordinada de varios componentes físicos.', remember:'Un sistema tecnológico funciona como un conjunto.', goal:'Integrar conceptos de hardware en una sola idea.'}
+        ]
+      },
+      2:{
+        name:'Dispositivos de Red',
+        lesson:{
+          icon:'🌐',
+          title:'Equipos y medios de conectividad',
+          text:'Las redes de computadores requieren dispositivos especializados para comunicar equipos, distribuir tráfico y brindar acceso a otros recursos.',
+          highlight:'Clave: no todos los dispositivos de red cumplen la misma función; algunos interconectan equipos, otros enrutan tráfico y otros amplían cobertura.',
+          concepts:[
+            {title:'Router',desc:'Conecta redes y enruta paquetes.'},
+            {title:'Switch',desc:'Interconecta dispositivos dentro de una misma red local.'},
+            {title:'Access Point',desc:'Brinda conectividad inalámbrica.'},
+            {title:'Cableado',desc:'Transporta señales de red en enlaces físicos.'}
+          ]
+        },
+        levels:[
+          {mission:'Identifica el dispositivo correcto.', fragment:'En una oficina, varios computadores se conectan entre sí para compartir archivos e impresoras dentro de la misma red local.', hint:'Piensa en el equipo que interconecta dispositivos en LAN.', question:'¿Qué dispositivo es el más apropiado?', options:[{title:'Switch',desc:'Interconecta equipos en la misma red local.'},{title:'Router',desc:'Conecta redes diferentes.'},{title:'Módem',desc:'Adapta señal del proveedor.'},{title:'UPS',desc:'Da respaldo eléctrico.'}], correct:0, explanation:'El switch es el dispositivo diseñado para interconectar equipos dentro de una red local.', remember:'LAN suele relacionarse con switches.', goal:'Diferenciar función del switch frente a otros equipos.'},
+          {mission:'Distingue entre router y switch.', fragment:'Una institución necesita conectar su red interna con Internet y administrar el tráfico hacia el exterior.', hint:'Aquí no solo se conectan equipos entre sí: también se enlaza con otras redes.', question:'¿Qué dispositivo cumple mejor esa función?', options:[{title:'Router',desc:'Conecta redes y enruta tráfico.'},{title:'Switch',desc:'Opera dentro de una sola red local.'},{title:'Teclado',desc:'No es un dispositivo de red.'},{title:'Monitor',desc:'No participa en conectividad.'}], correct:0, explanation:'El router se usa para conectar la red interna con otras redes, como Internet.', remember:'Cuando hay salida a otras redes, piensa en router.', goal:'Diferenciar router y switch por su papel en la red.'},
+          {mission:'Reconoce conectividad inalámbrica.', fragment:'En un aula tecnológica quieren ampliar la cobertura Wi-Fi para que más dispositivos móviles se conecten a la red institucional.', hint:'Se requiere un dispositivo orientado a acceso inalámbrico.', question:'¿Cuál es la mejor elección?', options:[{title:'Access Point',desc:'Amplía o brinda acceso inalámbrico.'},{title:'Switch',desc:'Trabaja principalmente con conexiones cableadas.'},{title:'Disco duro',desc:'No tiene función de red.'},{title:'Fuente de poder',desc:'No ofrece conectividad.'}], correct:0, explanation:'El access point permite brindar o ampliar conectividad inalámbrica en una red.', remember:'Wi‑Fi y cobertura suelen asociarse a access point.', goal:'Relacionar necesidad de cobertura con el dispositivo adecuado.'},
+          {mission:'Interpreta un escenario técnico.', fragment:'Un técnico revisa una instalación y encuentra que el medio de transmisión es un cable de par trenzado terminado en conectores RJ45.', hint:'No te están preguntando por un equipo activo, sino por el medio físico.', question:'¿Qué está describiendo el escenario?', options:[{title:'Cable UTP de red',desc:'Es un medio físico común en redes Ethernet.'},{title:'Tarjeta madre',desc:'No es un medio de transmisión.'},{title:'Router inalámbrico',desc:'No corresponde a cableado descrito.'},{title:'Memoria RAM',desc:'No participa como medio de red.'}], correct:0, explanation:'La descripción corresponde a un cable UTP usado en redes Ethernet.', remember:'RJ45 es una pista clara de cableado de red.', goal:'Reconocer medios físicos de transmisión.'},
+          {mission:'Cierra el mundo con una visión integrada.', fragment:'Una red funcional necesita equipos de interconexión, medios de transmisión y criterios de organización para que la comunicación ocurra correctamente.', hint:'No basta con tener computadores; la red requiere infraestructura complementaria.', question:'¿Qué idea es la más adecuada?', options:[{title:'Las redes dependen de varios dispositivos y medios que cumplen funciones diferentes',desc:'Resume correctamente el concepto.'},{title:'Un solo router reemplaza todos los dispositivos',desc:'Es una simplificación incorrecta.'},{title:'Los cables no son necesarios si existe un switch',desc:'No siempre es cierto.'},{title:'Un access point funciona igual que un disco duro',desc:'No tiene sentido técnico.'}], correct:0, explanation:'Las redes requieren varios dispositivos y medios que cumplen funciones distintas y complementarias.', remember:'Una red es un sistema, no una sola pieza.', goal:'Integrar funciones de los dispositivos de red.'}
+        ]
+      },
+      3:{
+        name:'Topologías',
+        lesson:{
+          icon:'🔗',
+          title:'Formas de organizar una red',
+          text:'La topología describe la forma en que los dispositivos se organizan e interconectan en una red. Esta estructura afecta rendimiento, mantenimiento y escalabilidad.',
+          highlight:'Clave: la topología no es solo un dibujo; también expresa cómo circula la comunicación y qué pasa ante una falla.',
+          concepts:[
+            {title:'Estrella',desc:'Los equipos se conectan a un dispositivo central.'},
+            {title:'Bus',desc:'Todos comparten un mismo canal principal.'},
+            {title:'Anillo',desc:'Los dispositivos se conectan formando un circuito cerrado.'},
+            {title:'Malla',desc:'Existen múltiples caminos entre nodos.'}
+          ]
+        },
+        levels:[
+          {mission:'Reconoce la topología descrita.', fragment:'Todos los computadores se conectan a un switch central, y si uno de los cables falla, solo ese equipo queda aislado.', hint:'Hay un nodo central claramente definido.', question:'¿Qué topología se describe?', options:[{title:'Estrella',desc:'Cada equipo se conecta a un punto central.'},{title:'Bus',desc:'Todos comparten un mismo canal.'},{title:'Anillo',desc:'Se conectan en circuito cerrado.'},{title:'Malla',desc:'Hay rutas múltiples entre todos.'}], correct:0, explanation:'Se trata de una topología en estrella, ya que los nodos dependen de un dispositivo central.', remember:'Nodo central = estrella.', goal:'Distinguir topologías por descripción funcional.'},
+          {mission:'Identifica una limitación.', fragment:'En una red antigua, todos los dispositivos comparten un único medio de transmisión, y una falla en ese canal afecta a toda la comunicación.', hint:'Piensa en una estructura lineal con troncal compartida.', question:'¿Qué topología se ajusta mejor?', options:[{title:'Bus',desc:'Todos comparten un mismo canal principal.'},{title:'Estrella',desc:'Depende de un nodo central.'},{title:'Malla',desc:'Tiene múltiples rutas.'},{title:'Árbol',desc:'Organiza ramas jerárquicas.'}], correct:0, explanation:'La topología bus usa un canal principal compartido por todos los dispositivos.', remember:'Canal compartido es la pista clave.', goal:'Relacionar topología con comportamiento de la red.'},
+          {mission:'Interpreta una estructura cerrada.', fragment:'Cada nodo se conecta con el siguiente y el último vuelve a conectarse con el primero, formando un circuito continuo.', hint:'La clave es la forma circular del enlace.', question:'¿Qué topología se describe?', options:[{title:'Anillo',desc:'Forma un circuito cerrado.'},{title:'Bus',desc:'Usa un canal lineal.'},{title:'Estrella',desc:'Tiene un nodo central.'},{title:'Punto a punto',desc:'Conecta solo dos dispositivos.'}], correct:0, explanation:'Esa descripción corresponde a una topología en anillo.', remember:'Circuito cerrado = anillo.', goal:'Identificar topología por estructura de conexión.'},
+          {mission:'Reconoce una ventaja de redundancia.', fragment:'En un sistema crítico, varios nodos pueden comunicarse por diferentes caminos, de modo que una falla no interrumpe completamente la red.', hint:'Busca la topología con alta redundancia.', question:'¿Qué topología ofrece mejor esa característica?', options:[{title:'Malla',desc:'Permite múltiples rutas entre nodos.'},{title:'Bus',desc:'Depende de un medio compartido.'},{title:'Anillo',desc:'No destaca por rutas múltiples.'},{title:'Estrella',desc:'Depende de un nodo central.'}], correct:0, explanation:'La topología en malla ofrece redundancia gracias a sus múltiples rutas.', remember:'Redundancia suele asociarse a malla.', goal:'Relacionar topología con tolerancia a fallos.'},
+          {mission:'Cierra el mundo de topologías.', fragment:'La forma de conexión de los dispositivos condiciona mantenimiento, costo, escalabilidad y respuesta frente a fallas.', hint:'La topología tiene impacto técnico, no solo visual.', question:'¿Cuál afirmación resume mejor la idea?', options:[{title:'La topología influye en el comportamiento y administración de la red',desc:'Es la mejor síntesis.'},{title:'Todas las topologías funcionan exactamente igual',desc:'Es falso.'},{title:'La topología solo importa en dibujos de clase',desc:'Minimiza su valor técnico.'},{title:'Una red no necesita organización física o lógica',desc:'No es correcto.'}], correct:0, explanation:'La topología influye directamente en el comportamiento, mantenimiento y administración de la red.', remember:'La estructura de una red afecta su funcionamiento.', goal:'Comprender el valor técnico de la topología.'}
+        ]
+      },
+      4:{
+        name:'Diagnóstico y Soporte',
+        lesson:{
+          icon:'🧪',
+          title:'Pensamiento técnico para soporte inicial',
+          text:'El diagnóstico en hardware y redes consiste en observar síntomas, identificar causas probables y seleccionar acciones de verificación o soporte inicial.',
+          highlight:'Clave: diagnosticar no es adivinar; implica analizar síntomas, descartar hipótesis y verificar con lógica técnica.',
+          concepts:[
+            {title:'Síntoma',desc:'Manifestación visible del problema.'},
+            {title:'Causa probable',desc:'Hipótesis técnica razonable.'},
+            {title:'Verificación',desc:'Acción para comprobar la hipótesis.'},
+            {title:'Soporte inicial',desc:'Primeras medidas antes de escalar o reemplazar.'}
+          ]
+        },
+        levels:[
+          {mission:'Selecciona la primera verificación más lógica.', fragment:'Un computador no enciende. El usuario afirma que ayer funcionaba normalmente y hoy no responde al presionar el botón de encendido.', hint:'Antes de asumir daño interno, conviene revisar lo básico.', question:'¿Qué verificación inicial es más razonable?', options:[{title:'Revisar alimentación eléctrica y conexión del cable de poder',desc:'Es una primera acción lógica.'},{title:'Cambiar inmediatamente la tarjeta madre',desc:'Es una medida prematura.'},{title:'Formatear el disco duro',desc:'No corresponde al síntoma.'},{title:'Cambiar el monitor',desc:'No explica que no encienda.'}], correct:0, explanation:'La primera verificación lógica es revisar alimentación eléctrica y cableado de poder.', remember:'Empieza por lo más básico y probable.', goal:'Aplicar lógica de soporte inicial.'},
+          {mission:'Diagnostica un fallo de red.', fragment:'Un equipo tiene encendido, pero no navega por Internet. Otros equipos sí tienen conexión en la misma oficina.', hint:'El problema parece localizado, no general.', question:'¿Cuál es la hipótesis más razonable?', options:[{title:'Puede haber un problema en el cable, adaptador o configuración de ese equipo',desc:'Es coherente con un fallo localizado.'},{title:'Toda la red del edificio cayó',desc:'Los otros equipos sí navegan.'},{title:'El switch dejó de funcionar por completo',desc:'Eso afectaría a más equipos.'},{title:'El disco duro del usuario está lleno',desc:'No explica la conectividad.'}], correct:0, explanation:'Si otros equipos navegan, es razonable pensar en una falla localizada en ese equipo o su conexión.', remember:'Compara el síntoma con el comportamiento del resto de la red.', goal:'Distinguir fallas generales de fallas localizadas.'},
+          {mission:'Interpreta una situación de periféricos.', fragment:'El usuario escribe, pero en pantalla aparecen caracteres inesperados. El resto del sistema parece funcionar con normalidad.', hint:'La falla está relacionada con entrada de texto.', question:'¿Qué componente conviene revisar primero?', options:[{title:'Teclado o configuración del idioma del teclado',desc:'Es la opción más lógica.'},{title:'Monitor',desc:'No genera caracteres.'},{title:'Parlantes',desc:'No intervienen en la escritura.'},{title:'Router',desc:'No explica ese síntoma.'}], correct:0, explanation:'Conviene revisar el teclado o la configuración de idioma, pues el síntoma afecta el ingreso de texto.', remember:'La pista principal es el tipo de tarea afectada.', goal:'Asociar síntoma con componente pertinente.'},
+          {mission:'Elige la acción más prudente.', fragment:'En una sala de informática, un punto de acceso inalámbrico parece no dar cobertura suficiente y varios estudiantes pierden conexión en una zona específica del aula.', hint:'No necesariamente es daño físico; puede ser ubicación o cobertura.', question:'¿Qué acción inicial es más adecuada?', options:[{title:'Revisar ubicación, cobertura y estado del access point',desc:'Es una verificación pertinente.'},{title:'Cambiar todos los computadores del aula',desc:'Es desproporcionado.'},{title:'Formatear los equipos',desc:'No resuelve la cobertura.'},{title:'Desconectar el switch principal',desc:'Podría empeorar la situación.'}], correct:0, explanation:'La acción inicial más adecuada es revisar la ubicación, cobertura y estado del access point.', remember:'En redes inalámbricas, la cobertura es una pista clave.', goal:'Elegir acciones técnicas proporcionadas al problema.'},
+          {mission:'Cierra el módulo de diagnóstico.', fragment:'Un buen soporte inicial requiere observar síntomas, plantear hipótesis y verificar antes de tomar decisiones mayores.', hint:'El diagnóstico técnico se apoya en análisis y no en impulsos.', question:'¿Qué afirmación resume mejor la idea?', options:[{title:'Diagnosticar implica analizar, verificar y actuar con criterio',desc:'Resume correctamente el enfoque.'},{title:'Lo mejor siempre es cambiar de inmediato el componente',desc:'No es una práctica responsable.'},{title:'Si algo falla, debe ser un virus',desc:'Generaliza sin evidencia.'},{title:'El soporte técnico consiste en probar al azar',desc:'No es profesional.'}], correct:0, explanation:'El diagnóstico técnico implica analizar síntomas, verificar hipótesis y actuar con criterio.', remember:'Soporte responsable = observación + verificación + decisión.', goal:'Consolidar pensamiento técnico básico.'}
+        ]
+      }
+    };
+
+    let currentWorld = 1;
+    let currentLevel = 0;
+    let score = 0;
+    let lives = MAX_LIVES;
+    let selectedOption = null;
+    let timerInterval = null;
+    let timeLeft = LEVEL_TIME;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function $(id){ return document.getElementById(id); }
+    function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+
+    function initAudio(){
+      if(!audioCtx){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if(AC) audioCtx = new AC();
+      }
+      if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function beep(freq=440,duration=0.12,type='sine',volume=0.03){
+      if(!soundEnabled) return;
+      initAudio();
+      if(!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type; osc.frequency.value = freq; gain.gain.value = volume;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.stop(audioCtx.currentTime + duration);
+    }
+    function soundStart(){ beep(520,0.08,'sine',0.025); setTimeout(()=>beep(740,0.08,'sine',0.025),60); }
+    function soundSelect(){ beep(540,0.05,'square',0.018); }
+    function soundCorrect(){ beep(660,0.08,'triangle',0.035); setTimeout(()=>beep(880,0.12,'triangle',0.035),70); setTimeout(()=>beep(1046,0.14,'triangle',0.035),150); }
+    function soundWrong(){ beep(220,0.14,'sawtooth',0.03); setTimeout(()=>beep(160,0.18,'sawtooth',0.03),90); }
+    function soundTick(){ beep(520,0.03,'square',0.01); }
+
+    function toggleSound(){
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundBtn');
+      if(btn) btn.textContent = soundEnabled ? '🔊 Sonido ON' : '🔇 Sonido OFF';
+      if(soundEnabled) soundStart();
+    }
+
+    function clearTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval = null; } }
+    function updateTimerUI(){ $('timerText').textContent = `${timeLeft} s`; $('timerFill').style.width = `${Math.max(0,(timeLeft / LEVEL_TIME) * 100)}%`; }
+    function startTimer(){
+      clearTimer(); timeLeft = LEVEL_TIME; updateTimerUI();
+      timerInterval = setInterval(()=>{
+        timeLeft--; updateTimerUI();
+        if(timeLeft <= 5 && timeLeft > 0) soundTick();
+        if(timeLeft <= 0){ clearTimer(); onTimeOut(); }
+      },1000);
+    }
+
+    function onTimeOut(){
+      lives--; renderLives(); soundWrong();
+      if(lives <= 0){
+        showFeedback(false,'⏰ Tiempo agotado','Se acabó el tiempo y también tus vidas. Volverás al inicio para intentarlo de nuevo.');
+        setTimeout(()=>{ resetGameState(); show('intro'); hideFeedback(); },2600);
+      } else {
+        showFeedback(false,'⏰ Tiempo agotado',`No respondiste a tiempo. Vidas restantes: ${lives}.`);
+      }
+    }
+
+    function resetGameState(){ clearTimer(); score = 0; lives = MAX_LIVES; currentLevel = 0; selectedOption = null; }
+    function goHome(){ clearTimer(); hideFeedback(); show('intro'); }
+    function renderLives(){ $('livesDisplay').textContent = '❤️'.repeat(lives) + '🖤'.repeat(Math.max(0, MAX_LIVES - lives)); }
+
+    function startWorld(worldId){
+      currentWorld = worldId; currentLevel = 0; score = 0; lives = MAX_LIVES; selectedOption = null;
+      const lesson = WORLDS[worldId].lesson;
+      $('lessonIcon').textContent = lesson.icon;
+      $('lessonTitle').textContent = lesson.title;
+      $('lessonText').textContent = lesson.text;
+      $('lessonHighlight').textContent = lesson.highlight;
+      $('lessonConcepts').innerHTML = lesson.concepts.map(c => `<div class="concept-card"><h4>${c.title}</h4><p>${c.desc}</p></div>`).join('');
+      show('lesson');
+    }
+
+    function startGame(){ show('game'); soundStart(); loadLevel(); }
+
+    function loadLevel(){
+      clearTimer();
+      const world = WORLDS[currentWorld];
+      const level = world.levels[currentLevel];
+      selectedOption = null;
+      $('levelLabel').textContent = `${world.name} — Nivel ${currentLevel + 1}/${world.levels.length}`;
+      $('progressBar').style.width = `${((currentLevel + 1) / world.levels.length) * 100}%`;
+      $('scoreDisplay').textContent = score;
+      renderLives();
+      $('missionText').textContent = level.mission;
+      $('fragmentBox').textContent = level.fragment;
+      $('hintBox').textContent = `💡 Pista: ${level.hint}`;
+      $('questionText').textContent = level.question;
+      $('rememberText').textContent = level.remember || 'Relaciona función, contexto y dispositivo antes de responder.';
+      $('goalText').textContent = level.goal || 'Comprender el concepto técnico y escoger la respuesta más precisa.';
+      $('optionsBox').innerHTML = '';
+      level.options.forEach((opt,index)=>{
+        const article = document.createElement('article');
+        article.className = 'option';
+        article.innerHTML = `<div class="option-title">${opt.title}</div><div class="option-desc">${opt.desc}</div>`;
+        article.onclick = ()=>selectOption(index);
+        $('optionsBox').appendChild(article);
+      });
+      startTimer();
+    }
+
+    function selectOption(index){
+      selectedOption = index;
+      soundSelect();
+      document.querySelectorAll('.option').forEach((el,i)=>el.classList.toggle('selected', i===index));
+    }
+
+    function clearSelection(){ selectedOption = null; document.querySelectorAll('.option').forEach(el=>el.classList.remove('selected','correct','wrong')); }
+
+    function checkAnswer(){
+      const level = WORLDS[currentWorld].levels[currentLevel];
+      if(selectedOption === null){ showFeedback(false,'🤔 Elige una opción','Primero debes seleccionar una respuesta para continuar.'); return; }
+      clearTimer();
+      const options = document.querySelectorAll('.option');
+      options.forEach((el,i)=>{
+        el.classList.remove('correct','wrong');
+        if(i===level.correct) el.classList.add('correct');
+        if(i===selectedOption && i!==level.correct) el.classList.add('wrong');
+      });
+
+      if(selectedOption === level.correct){
+        score += 100; $('scoreDisplay').textContent = score; soundCorrect(); spawnConfetti();
+        const isLast = currentLevel === WORLDS[currentWorld].levels.length - 1;
+        showFeedback(true, isLast ? '🏆 ¡Mundo completado!' : '🎉 ¡Correcto!', `${level.explanation}${isLast ? ' Has completado este mundo de Compu Bot con éxito.' : ' Continúa al siguiente nivel.'}`, isLast);
+      } else {
+        lives--; renderLives(); soundWrong();
+        if(lives <= 0){
+          showFeedback(false,'💀 Juego terminado',`${level.explanation} Te quedaste sin vidas. Volverás al inicio para intentarlo de nuevo.`);
+          setTimeout(()=>{ resetGameState(); show('intro'); hideFeedback(); },2600);
+        } else {
+          showFeedback(false,'❌ Respuesta incorrecta',`${level.explanation} Vidas restantes: ${lives}.`);
+        }
+      }
+    }
+
+    function nextLevel(){ hideFeedback(); currentLevel++; if(currentLevel >= WORLDS[currentWorld].levels.length){ clearTimer(); show('intro'); return; } loadLevel(); }
+    function retryLevel(){ hideFeedback(); loadLevel(); }
+
+    function showFeedback(success,title,message,worldEnd=false){
+      $('feedback').classList.add('show');
+      $('fbIcon').textContent = success ? (worldEnd ? '🏆' : '🎉') : '📘';
+      $('fbTitle').textContent = title;
+      $('fbMsg').textContent = message;
+      const nextBtn = $('nextBtn');
+      if(success && worldEnd){
+        nextBtn.textContent = 'Ir al inicio';
+        nextBtn.onclick = ()=>{ hideFeedback(); clearTimer(); show('intro'); };
+      } else {
+        nextBtn.textContent = success ? 'Siguiente nivel' : 'Intentar de nuevo';
+        nextBtn.onclick = success ? nextLevel : retryLevel;
+      }
+    }
+    function hideFeedback(){ $('feedback').classList.remove('show'); $('nextBtn').onclick = nextLevel; }
+
+    function spawnConfetti(){
+      const colors = ['#60a5fa','#2dd4bf','#a78bfa','#fbbf24','#4ade80','#fb923c'];
+      for(let i=0;i<60;i++){
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random()*100}vw`;
+        piece.style.top = '-20px';
+        piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+        piece.style.width = `${6 + Math.random()*8}px`;
+        piece.style.height = `${6 + Math.random()*8}px`;
+        piece.style.animationDuration = `${1.3 + Math.random()*1.0}s`;
+        document.body.appendChild(piece);
+        setTimeout(()=>piece.remove(),2400);
+      }
+    }
+
+    function spawnFloaties(){
+      const symbols = ['🖥️','🌐','🔌','📡','⚙️','🧠','💾','🔗'];
+      setInterval(()=>{
+        const el = document.createElement('div');
+        el.className = 'floaty';
+        el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        el.style.left = `${Math.random()*96}vw`;
+        el.style.fontSize = `${20 + Math.random()*24}px`;
+        el.style.animationDuration = `${10 + Math.random()*10}s`;
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),20000);
+      },900);
+    }
+
+    spawnFloaties();
+    renderLives();
+    updateTimerUI();
+  </script>
+</body>
+</html>
